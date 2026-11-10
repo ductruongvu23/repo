@@ -29,7 +29,7 @@ jobs:
         run: |
           sudo apt-get install -y --no-install-recommends dpkg-dev apt-utils
           mkdir -p site
-          cp -r debs CydiaIcon.png site/
+          cp -r debs CydiaIcon.png index.html site/
           touch site/.nojekyll
           cd site
           dpkg-scanpackages -m debs /dev/null > Packages

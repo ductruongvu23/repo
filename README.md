@@ -4,11 +4,20 @@ APT repo for Sileo / Zebra, hosted on GitHub Pages.
 
 ## Add this source
 
-In Sileo or Zebra, add:
+Tap a button on your iPhone / iPad to add the source in one step:
+
+[![Add to Sileo](https://img.shields.io/badge/Add%20to-Sileo-0A84FF?style=for-the-badge)](https://ductruongvu23.github.io/repo/#sileo)
+[![Add to Zebra](https://img.shields.io/badge/Add%20to-Zebra-111111?style=for-the-badge)](https://ductruongvu23.github.io/repo/#zebra)
+[![Add to Cydia](https://img.shields.io/badge/Add%20to-Cydia-A0522D?style=for-the-badge)](https://ductruongvu23.github.io/repo/#cydia)
+[![Add to Installer](https://img.shields.io/badge/Add%20to-Installer-34C759?style=for-the-badge)](https://ductruongvu23.github.io/repo/#installer)
+
+Or add it manually:
 
 ```
 https://ductruongvu23.github.io/repo/
 ```
+
+The buttons open [the repo page](https://ductruongvu23.github.io/repo/), which hands the source to your package manager.
 
 ## Packages
 
