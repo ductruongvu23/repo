@@ -1,0 +1,4 @@
+#!/bin/sh
+# Put the app icon on the home screen
+/var/jb/usr/bin/uicache -p /var/jb/Applications/SafeModeLog.app || true
+exit 0

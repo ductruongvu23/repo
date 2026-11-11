@@ -24,12 +24,19 @@ The buttons open [the repo page](https://ductruongvu23.github.io/repo/), which h
 | Package | Description |
 | --- | --- |
 | [VietTweak](https://github.com/ductruongvu23/VietTweak) | Translates other tweaks' settings pages into Vietnamese |
+| [SafeModeLog](src/SafeModeLog) | Crash log viewer that finds the tweak that put your device into Safe Mode |
 
 ## Adding or updating a tweak
+
+### A prebuilt `.deb`
 
 1. Put the `.deb` into `debs/` (on GitHub: open `debs/` → **Add file → Upload files**).
 2. Commit to `main`.
 
 The **Publish repo** workflow rebuilds `Packages` and `Release` from everything in `debs/` and deploys the site. Old versions can stay in `debs/`; Sileo/Zebra offer the newest one. Delete a `.deb` to remove it from the repo.
+
+### A tweak built from source
+
+Each Theos project in `src/` (one folder per package) is built by the **Build sources** workflow whenever something in `src/` changes. It runs the tests, builds the rootless `.deb`, commits it into `debs/` and then runs **Publish repo**. Bump `Version:` in the package's `control` to ship an update to people who already installed it.
 
 The repo icon shown in Sileo/Zebra is `CydiaIcon.png`.

@@ -1,0 +1,9 @@
+Package: com.ductruongvu23.safemodelog
+Name: SafeModeLog
+Version: 1.0.0
+Architecture: iphoneos-arm
+Description: View crash logs and find the tweak that put your device into Safe Mode
+Maintainer: ductruongvu23
+Author: ductruongvu23
+Section: Utilities
+Depends: firmware (>= 15.0), uikittools

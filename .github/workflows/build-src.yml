@@ -1,0 +1,111 @@
+name: Build sources
+
+# Builds every package in src/ when its source changes, commits the .debs into debs/,
+# then runs "Publish repo". Uploading a prebuilt .deb to debs/ does not go through here.
+on:
+  push:
+    branches: [ main ]
+    paths: [ 'src/**', '.github/workflows/build-src.yml' ]
+  workflow_dispatch:
+
+concurrency:
+  group: build-src
+  cancel-in-progress: false
+
+jobs:
+  # SafeModeLog's crash-log parser is plain Foundation, so it is tested on macOS without a device.
+  test:
+    runs-on: macos-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: SafeModeLog tests
+        run: |
+          cd src/SafeModeLog
+          clang -fobjc-arc -Wall -Werror -framework Foundation CrashLog.m tests/CrashLogTests.m -o "$RUNNER_TEMP/tests"
+          "$RUNNER_TEMP/tests"
+
+  build:
+    needs: test
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write  # commit the built .debs
+      actions: write   # start "Publish repo"
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Cache Theos
+        uses: actions/cache@v4
+        with:
+          path: ~/theos
+          key: theos-${{ runner.os }}-v3
+          restore-keys: theos-${{ runner.os }}-
+
+      - name: Install build dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            build-essential clang lld dpkg-dev fakeroot git perl python3 rsync zip xz-utils ca-certificates curl
+          # ldid is not in Ubuntu 26.04 apt; use the Procursus release binary
+          sudo curl -fL -o /usr/local/bin/ldid \
+            https://github.com/ProcursusTeam/ldid/releases/download/v2.1.5-procursus7/ldid_linux_x86_64
+          sudo chmod +x /usr/local/bin/ldid
+
+      - name: Install Theos
+        run: |
+          if [ ! -d "$HOME/theos/.git" ]; then
+            git clone --recursive https://github.com/theos/theos.git "$HOME/theos"
+          else
+            (cd "$HOME/theos" && git pull --ff-only && git submodule update --init --recursive)
+          fi
+          # Theos on Linux needs a separate iOS toolchain (clang/ld64)
+          if [ ! -x "$HOME/theos/toolchain/linux/iphone/bin/clang" ]; then
+            mkdir -p "$HOME/theos/toolchain"
+            curl -fsSL https://github.com/L1ghtmann/llvm-project/releases/latest/download/iOSToolchain-x86_64.tar.xz \
+              | tar -xJf - -C "$HOME/theos/toolchain"
+          fi
+
+      - name: Install iOS 16.5 SDK
+        run: |
+          mkdir -p "$HOME/theos/sdks"
+          cd "$HOME/theos/sdks"
+          if [ ! -d "iPhoneOS16.5.sdk" ]; then
+            git clone --depth 1 --filter=blob:none --sparse https://github.com/theos/sdks.git /tmp/sdks
+            git -C /tmp/sdks sparse-checkout set iPhoneOS16.5.sdk
+            mv /tmp/sdks/iPhoneOS16.5.sdk .
+            rm -rf /tmp/sdks
+          fi
+
+      - name: Build packages
+        run: |
+          export THEOS="$HOME/theos"
+          export PATH="$THEOS/bin:$PATH"
+          for dir in src/*/; do
+            echo "::group::$dir"
+            make -C "$dir" package FINALPACKAGE=1 THEOS_PACKAGE_SCHEME=rootless
+            echo "::endgroup::"
+          done
+
+      - name: Check SafeModeLog package
+        run: |
+          DEB=$(ls src/SafeModeLog/packages/*.deb)
+          dpkg-deb --info "$DEB"
+          dpkg-deb --contents "$DEB"
+          dpkg-deb --contents "$DEB" | grep -q './var/jb/Applications/SafeModeLog.app/SafeModeLog$'
+          dpkg-deb --contents "$DEB" | grep -q 'AppIcon60x60@2x.png'
+
+      - name: Commit .debs and publish
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          cp src/*/packages/*.deb debs/
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add debs
+          git commit -m "Build packages from src/"
+          git pull --rebase origin main
+          git push origin HEAD:main
+          # Pushes made with the workflow token do not trigger other workflows; dispatch does.
+          gh workflow run publish.yml --ref main
