@@ -39,4 +39,7 @@ The **Publish repo** workflow rebuilds `Packages` and `Release` from everything 
 
 Each Theos project in `src/` (one folder per package) is built by the **Build sources** workflow whenever something in `src/` changes. It runs the tests, builds the rootless `.deb`, commits it into `debs/` and then runs **Publish repo**. Bump `Version:` in the package's `control` to ship an update to people who already installed it.
 
-The repo icon shown in Sileo/Zebra is `CydiaIcon.png`.
+### Icons
+
+- The source's icon in Sileo/Zebra is `CydiaIcon.png`.
+- A package's icon is `icons/<package-id>.png` (square, 256 px), e.g. `icons/com.viettweak.translate.png`. The publish workflow adds it as the package's `Icon` field, so the `.deb` does not need rebuilding.

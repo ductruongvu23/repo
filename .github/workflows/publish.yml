@@ -30,10 +30,15 @@ jobs:
           # retries: runner DNS hiccups otherwise fail the whole publish
           sudo apt-get install -y --no-install-recommends -o Acquire::Retries=5 dpkg-dev apt-utils
           mkdir -p site
-          cp -r debs CydiaIcon.png index.html site/
+          cp -r debs icons CydiaIcon.png index.html site/
           touch site/.nojekyll
+          # icons/<package-id>.png becomes that package's Icon in Sileo/Zebra, no .deb rebuild needed
+          BASE="https://${GITHUB_REPOSITORY_OWNER,,}.github.io/${GITHUB_REPOSITORY#*/}"
+          for icon in icons/*.png; do
+            [ -e "$icon" ] && echo "$(basename "$icon" .png) Icon $BASE/$icon"
+          done > icons.override
           cd site
-          dpkg-scanpackages -m debs /dev/null > Packages
+          dpkg-scanpackages -m -e ../icons.override debs /dev/null > Packages
           gzip -k9 Packages
           bzip2 -k9 Packages
           xz -k9 Packages
