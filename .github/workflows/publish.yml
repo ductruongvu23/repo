@@ -27,7 +27,8 @@ jobs:
 
       - name: Build APT index
         run: |
-          sudo apt-get install -y --no-install-recommends dpkg-dev apt-utils
+          # retries: runner DNS hiccups otherwise fail the whole publish
+          sudo apt-get install -y --no-install-recommends -o Acquire::Retries=5 dpkg-dev apt-utils
           mkdir -p site
           cp -r debs CydiaIcon.png index.html site/
           touch site/.nojekyll
