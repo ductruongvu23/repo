@@ -93,8 +93,10 @@ jobs:
           DEB=$(ls src/SafeModeLog/packages/*.deb)
           dpkg-deb --info "$DEB"
           dpkg-deb --contents "$DEB"
-          dpkg-deb --contents "$DEB" | grep -q './var/jb/Applications/SafeModeLog.app/SafeModeLog$'
+          dpkg-deb --contents "$DEB" | grep -q 'var/jb/Applications/SafeModeLog.app/SafeModeLog$'
           dpkg-deb --contents "$DEB" | grep -q 'AppIcon60x60@2x.png'
+          # Without no-sandbox the app cannot read crash logs
+          ldid -e src/SafeModeLog/.theos/_/var/jb/Applications/SafeModeLog.app/SafeModeLog | tee /dev/stderr | grep -q 'com.apple.private.security.no-sandbox'
 
       - name: Commit .debs and publish
         env:
