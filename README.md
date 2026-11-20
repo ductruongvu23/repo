@@ -25,6 +25,7 @@ The buttons open [the repo page](https://ductruongvu23.github.io/repo/), which h
 | --- | --- |
 | [VietTweak](https://github.com/ductruongvu23/VietTweak) | Translates other tweaks' settings pages into Vietnamese |
 | [SafeModeLog](src/SafeModeLog) | Crash log viewer that finds the tweak that put your device into Safe Mode |
+| [PhoneBox Extras](https://github.com/ductruongvu23/phonebox/tree/ios/ios) | USB tunnel, wake and open on plug-in, volume keys and kiosk mode for the PhoneBox iPhone app (rootless, iOS 15+; the app itself comes from the TrollStore `.ipa`) |
 
 ## Adding or updating a tweak
 
